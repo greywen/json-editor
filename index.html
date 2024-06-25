@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JavaScript Object Notation</title>
+    <link
+      rel="stylesheet"
+      href="./libs/monaco-editor/min/vs/editor/editor.main.css"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div id="editor"></div>
+    </div>
+    <script src="./libs/monaco-editor/min/vs/loader.js"></script>
+    <script src="./storage.js"></script>
+    <script src="./editor.common.js"></script>
+    <script>
+      require.config({
+        paths: {
+          vs: './libs/monaco-editor/min/vs',
+        },
+      });
+      require(['vs/editor/editor.main'], function () {
+        let editor = monaco.editor.create(document.getElementById('editor'), {
+          language: 'json',
+          value: getLastHistory('original'),
+          minimap: { enabled: false },
+        });
+
+        removeDefaultContextMenu(editor);
+        const mainEditor = monaco.editor.getEditors()[0];
+        addCompressContextMenu(mainEditor);
+        addDiffContextMenu(mainEditor);
+
+        const model = editor.getModel();
+        model.onDidChangeContent((e) => {
+          setHistory('original', editor.getValue());
+        });
+      });
+    </script>
+  </body>
+</html>

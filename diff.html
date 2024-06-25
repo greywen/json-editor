@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Diff JavaScript Object Notation</title>
+    <link
+      rel="stylesheet"
+      href="./libs/monaco-editor/min/vs/editor/editor.main.css"
+    />
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div id="editor"></div>
+    </div>
+    <script src="./libs/monaco-editor/min/vs/loader.js"></script>
+    <script src="./storage.js"></script>
+    <script src="./editor.common.js"></script>
+    <script>
+      require.config({
+        paths: {
+          vs: './libs/monaco-editor/min/vs',
+        },
+      });
+      require(['vs/editor/editor.main'], function () {
+        const originalModel = monaco.editor.createModel(
+          getLastHistory('original'),
+          'json'
+        );
+        const modifiedModel = monaco.editor.createModel(
+          getLastHistory('modified'),
+          'json'
+        );
+
+        const diffEditor = monaco.editor.createDiffEditor(
+          document.getElementById('editor'),
+          {
+            language: 'json',
+            minimap: { enabled: false },
+            enableSplitViewResizing: true,
+          }
+        );
+
+        diffEditor.setModel({
+          original: originalModel,
+          modified: modifiedModel,
+        });
+
+        diffOriginalEditor = diffEditor.getOriginalEditor();
+        diffModifiedEditor = diffEditor.getModifiedEditor();
+
+        originalModel.onDidChangeContent((e) => {
+          setHistory('original', originalModel.getValue());
+        });
+
+        modifiedModel.onDidChangeContent((e) => {
+          setHistory('modified', modifiedModel.getValue());
+        });
+
+        removeDefaultContextMenu(diffOriginalEditor);
+        removeDefaultContextMenu(diffModifiedEditor);
+        addCompressContextMenu(diffOriginalEditor);
+        addCompressContextMenu(diffModifiedEditor);
+        diffOriginalEditor.updateOptions({
+          readOnly: false,
+        });
+      });
+    </script>
+  </body>
+</html>
